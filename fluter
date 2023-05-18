@@ -1,0 +1,157 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.red),
+      home: const Home(),
+    );
+  }
+}
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  var cells = ["", "", "", "", "", "", "", "", ""];
+  var player1 = "X";
+  var player2 = "O";
+  var currentplayer = "";
+  var winner = "";
+  var mytext = "Modaber Nist";
+  @override
+  void initState() {
+    setState(() {
+      // ignore: unused_local_variable
+      void currentplayer = player1;
+    });
+    super.initState();
+  }
+
+  void restartGame() {
+    setState(() {
+      cells = ["", "", "", "", "", "", "", "", ""];
+      currentplayer = player1;
+    });
+  }
+
+  bool checkWinner() {
+    // بررسی ردیف‌ها
+    for (var i = 0; i < 3; i++) {
+      if (cells[i * 3] == cells[i * 3 + 1] &&
+          cells[i * 3] == cells[i * 3 + 2] &&
+          cells[i * 3].isNotEmpty) {
+        winner = cells[i * 3]; // تنظیم برنده
+        return true;
+      }
+    }
+
+    // بررسی ستون‌ها
+    for (var i = 0; i < 3; i++) {
+      if (cells[i] == cells[i + 3] &&
+          cells[i] == cells[i + 6] &&
+          cells[i].isNotEmpty) {
+        winner = cells[i]; // تنظیم برنده
+        return true;
+      }
+    }
+
+    // بررسی قطر اصلی
+    if (cells[0] == cells[4] && cells[0] == cells[8] && cells[0].isNotEmpty) {
+      winner = cells[0]; // تنظیم برنده
+      return true;
+    }
+
+    // بررسی قطر فرعی
+    if (cells[2] == cells[4] && cells[2] == cells[6] && cells[2].isNotEmpty) {
+      winner = cells[2]; // تنظیم برنده
+      return true;
+    }
+
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("ModaberApp"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: restartGame,
+            ),
+          ],
+        ),
+        body: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3),
+          itemCount: cells.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  if (cells[index].isEmpty) {
+                    if (currentplayer == player1) {
+                      cells[index] = currentplayer;
+                      currentplayer = player2;
+                    } else {
+                      cells[index] = currentplayer;
+                      currentplayer = player1;
+                    }
+                    if (checkWinner()) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text(
+                                '${winner == player1 ? "Player1" : "Player 2"} Winner!'),
+                            actions: [
+                              TextButton(
+                                child: const Text('ریستارت'),
+                                onPressed: () {
+                                  restartGame();
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  } //
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadiusDirectional.only(
+                        topStart: Radius.circular(30),
+                        bottomEnd: Radius.circular(30)),
+                    color: Colors.cyanAccent),
+                child: Center(
+                  child: Text(
+                    cells[index],
+                    style: const TextStyle(
+                        fontSize: 40, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            );
+          },
+        ));
+  }
+}
